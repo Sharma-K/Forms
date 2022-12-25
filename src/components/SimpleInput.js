@@ -1,36 +1,56 @@
-import React,{useState, useRef} from 'react'
+import { useState } from 'react';
+
 const SimpleInput = (props) => {
-
   const [enteredName, setEnteredName] = useState('');
-  const [valid, isValid] = useState(true);
-  const name = useRef('');
+  const [enteredNameTouched, setEnteredNameTouched] = useState(false);
 
-  const nameInputClasses= valid?'form-control':'form-control invalid'
+  const enteredNameIsValid = enteredName.trim() !== '';
+  const nameInputIsInvalid = !enteredNameIsValid && enteredNameTouched;
 
-  const nameInputChangeHandler = (event)=>{
-    setEnteredName(event.target.value)
-    isValid(true)
-  }
-  const formSubmissionHandler = (event) =>{
+  const nameInputChangeHandler = (event) => {
+    setEnteredName(event.target.value);
+  };
+
+  const nameInputBlurHandler = event => {
+    setEnteredNameTouched(true);
+  };
+
+  const formSubmissionHandler = (event) => {
     event.preventDefault();
-    if(enteredName.trim()==='')
-    {
-      isValid(false);
+
+    setEnteredNameTouched(true);
+
+    if (!enteredNameIsValid) {
       return;
     }
-    isValid(true);
+
     console.log(enteredName);
+
+    // nameInputRef.current.value = ''; => NOT IDEAL, DON'T MANIPULATE THE DOM
     setEnteredName('');
-  }
+    setEnteredNameTouched(false);
+  };
+
+  const nameInputClasses = nameInputIsInvalid
+    ? 'form-control invalid'
+    : 'form-control';
 
   return (
     <form onSubmit={formSubmissionHandler}>
       <div className={nameInputClasses}>
         <label htmlFor='name'>Your Name</label>
-        <input ref={name} type='text' id='name' onChange={nameInputChangeHandler} />
-       {!valid && <p className='error-text'>Name must not be empty</p> }
+        <input
+          type='text'
+          id='name'
+          onChange={nameInputChangeHandler}
+          onBlur={nameInputBlurHandler}
+          value={enteredName}
+        />
+        {nameInputIsInvalid && (
+          <p className='error-text'>Name must not be empty.</p>
+        )}
       </div>
-      <div className="form-actions">
+      <div className='form-actions'>
         <button>Submit</button>
       </div>
     </form>
